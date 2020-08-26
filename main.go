@@ -59,7 +59,7 @@ func (s *Server) BroadcastMessage(ctx context.Context, msg *proto.Message) (*pro
 		go func(msg *proto.Message, conn *Connection) {
 			defer wait.Done()
 
-			if conn.active {
+			if conn.active && conn.topic == msg.Topic.Name {
 				err := conn.stream.Send(msg)
 				if err != nil {
 					grpcLog.Errorf("Error with Stream: %v , on topic: %v - Error: %v", conn.stream, conn.topic, err)
