@@ -33,6 +33,11 @@ type Server struct {
 	Connection []*Connection
 }
 
+// Queue creates a slice of proto.Queue
+type Queue struct {
+	queue []*proto.Queue
+}
+
 // CreateStream ensures the successful connection to start stream
 func (s *Server) CreateStream(pconn *proto.Connect, stream proto.Broadcast_CreateStreamServer) error {
 	conn := &Connection{
@@ -46,6 +51,43 @@ func (s *Server) CreateStream(pconn *proto.Connect, stream proto.Broadcast_Creat
 	s.Connection = append(s.Connection, conn)
 
 	return <-conn.error
+}
+
+// PushQueue is for pushing the queue
+func (s *Server) PushQueue(ctx context.Context, msg *proto.Message) (*proto.Queue, error) {
+	wait := sync.WaitGroup{}
+	done := make(chan int)
+	var globalQueue []*proto.Queue
+
+	for _, conn := range s.Connection {
+		wait.Add(1)
+
+		go func(msg *proto.Message, conn *Connection) {
+			defer wait.Done()
+			if conn.active && conn.topic == msg.Topic.Name {
+				err := conn.stream.Send(msg)
+				if err != nil {
+					grpcLog.Errorf("Error with Stream: %v , on topic: %v - Error: %v", conn.stream, conn.topic, err)
+					conn.active = false
+					conn.error <- err
+				}
+
+				queuePayload := &proto.Queue{
+					Message: msg,
+					Topic:   msg.Topic,
+				}
+				globalQueue = append(globalQueue, queuePayload)
+			}
+
+		}(msg, conn)
+
+	}
+	go func() {
+		wait.Wait()
+		close(done)
+	}()
+
+	return nil, nil
 }
 
 // BroadcastMessage is responsible for sending out messages
