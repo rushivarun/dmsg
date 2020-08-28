@@ -35,14 +35,6 @@ type Server struct {
 	Connection []*Connection
 }
 
-// Queue is the mq
-// type Queue struct {
-// 	messages []proto.Message
-// 	topic    proto.Topic
-// }
-
-// var qm Queue
-
 // CreateStream ensures the successful connection to start stream
 func (s *Server) CreateStream(pconn *proto.Connect, stream proto.Broadcast_CreateStreamServer) error {
 	conn := &Connection{
@@ -54,6 +46,7 @@ func (s *Server) CreateStream(pconn *proto.Connect, stream proto.Broadcast_Creat
 	}
 
 	s.Connection = append(s.Connection, conn)
+	fmt.Println("CONN is HERE", &conn)
 
 	return <-conn.error
 }
@@ -71,8 +64,6 @@ func (s *Server) BroadcastMessage(ctx context.Context, msg *proto.Message) (*pro
 
 			if conn.active && conn.topic.Name == msg.Topic.Name {
 				err := conn.stream.Send(msg)
-				// qm.topic = *conn.topic
-				// qm.messages = append(qm.messages, *msg)
 				conn.messages = append(conn.messages, *msg)
 				if err != nil {
 					grpcLog.Errorf("Error with Stream: %v , on topic: %v - Error: %v", conn.stream, conn.topic, err)
