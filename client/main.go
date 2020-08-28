@@ -104,12 +104,6 @@ func main() {
 				fmt.Printf("Error Sending Message: %v", err)
 				break
 			}
-
-			_, pushErr := client.PushQueue(context.Background(), msg)
-			if pushErr != nil {
-				fmt.Printf("Error Queuing Message: %v", err)
-				break
-			}
 		}
 
 	}()

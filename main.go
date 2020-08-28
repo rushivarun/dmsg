@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"dmsg/proto"
+	"fmt"
 	"log"
 	"net"
 	"os"
@@ -21,11 +22,12 @@ func init() {
 
 // Connection struct is the type of data for a connection
 type Connection struct {
-	stream proto.Broadcast_CreateStreamServer
-	id     string
-	active bool
-	topic  string
-	error  chan error
+	stream   proto.Broadcast_CreateStreamServer
+	id       string
+	active   bool
+	topic    proto.Topic
+	messages []proto.Message
+	error    chan error
 }
 
 // Server is a collection of all the succesful connections to create a stream
@@ -33,10 +35,13 @@ type Server struct {
 	Connection []*Connection
 }
 
-// Queue creates a slice of proto.Queue
-type Queue struct {
-	queue []*proto.Queue
-}
+// Queue is the mq
+// type Queue struct {
+// 	messages []proto.Message
+// 	topic    proto.Topic
+// }
+
+// var qm Queue
 
 // CreateStream ensures the successful connection to start stream
 func (s *Server) CreateStream(pconn *proto.Connect, stream proto.Broadcast_CreateStreamServer) error {
@@ -44,50 +49,13 @@ func (s *Server) CreateStream(pconn *proto.Connect, stream proto.Broadcast_Creat
 		stream: stream,
 		id:     pconn.User.Id,
 		active: true,
-		topic:  pconn.Topic.Name,
+		topic:  *pconn.Topic,
 		error:  make(chan error),
 	}
 
 	s.Connection = append(s.Connection, conn)
 
 	return <-conn.error
-}
-
-// PushQueue is for pushing the queue
-func (s *Server) PushQueue(ctx context.Context, msg *proto.Message) (*proto.Queue, error) {
-	wait := sync.WaitGroup{}
-	done := make(chan int)
-	var globalQueue []*proto.Queue
-
-	for _, conn := range s.Connection {
-		wait.Add(1)
-
-		go func(msg *proto.Message, conn *Connection) {
-			defer wait.Done()
-			if conn.active && conn.topic == msg.Topic.Name {
-				err := conn.stream.Send(msg)
-				if err != nil {
-					grpcLog.Errorf("Error with Stream: %v , on topic: %v - Error: %v", conn.stream, conn.topic, err)
-					conn.active = false
-					conn.error <- err
-				}
-
-				queuePayload := &proto.Queue{
-					Message: msg,
-					Topic:   msg.Topic,
-				}
-				globalQueue = append(globalQueue, queuePayload)
-			}
-
-		}(msg, conn)
-
-	}
-	go func() {
-		wait.Wait()
-		close(done)
-	}()
-
-	return nil, nil
 }
 
 // BroadcastMessage is responsible for sending out messages
@@ -101,13 +69,18 @@ func (s *Server) BroadcastMessage(ctx context.Context, msg *proto.Message) (*pro
 		go func(msg *proto.Message, conn *Connection) {
 			defer wait.Done()
 
-			if conn.active && conn.topic == msg.Topic.Name {
+			if conn.active && conn.topic.Name == msg.Topic.Name {
 				err := conn.stream.Send(msg)
+				// qm.topic = *conn.topic
+				// qm.messages = append(qm.messages, *msg)
+				conn.messages = append(conn.messages, *msg)
 				if err != nil {
 					grpcLog.Errorf("Error with Stream: %v , on topic: %v - Error: %v", conn.stream, conn.topic, err)
 					conn.active = false
 					conn.error <- err
+
 				}
+				fmt.Println(conn)
 				grpcLog.Info("Sending message to topic: ", conn.topic)
 
 			}
