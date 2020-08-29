@@ -35,6 +35,31 @@ type Server struct {
 	Connection []*Connection
 }
 
+// TopicSub keeps a track of subs on a particular topic
+type TopicSub struct {
+	topic    proto.Topic
+	subs     int64
+	messages []proto.Message
+}
+
+// GlobalTopic hold all topic data
+type GlobalTopic struct {
+	topics []string
+}
+
+// Find takes a slice and looks for an element in it. If found it will
+// return it's key, otherwise it will return -1 and a bool of false.
+func Find(slice []string, val string) (int, bool) {
+	for i, item := range slice {
+		if item == val {
+			return i, true
+		}
+	}
+	return -1, false
+}
+
+var gt GlobalTopic
+
 // CreateStream ensures the successful connection to start stream
 func (s *Server) CreateStream(pconn *proto.Connect, stream proto.Broadcast_CreateStreamServer) error {
 	conn := &Connection{
@@ -45,9 +70,16 @@ func (s *Server) CreateStream(pconn *proto.Connect, stream proto.Broadcast_Creat
 		error:  make(chan error),
 	}
 
+	_, result := Find(gt.topics, conn.topic.Name)
+	if result == true {
+		fmt.Println("New topic discovered")
+		gt.topics = append(gt.topics, conn.topic.Name)
+	} else {
+		fmt.Println("old topic found")
+	}
 	s.Connection = append(s.Connection, conn)
 	fmt.Println("CONN is HERE", &conn)
-
+	fmt.Println(gt)
 	return <-conn.error
 }
 
