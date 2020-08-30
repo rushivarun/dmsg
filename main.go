@@ -58,6 +58,16 @@ func Find(slice []TopicSub, val string) (int, bool) {
 	return -1, false
 }
 
+func getFileStat(path string) int64 {
+	fi, err := os.Stat(path)
+	if err != nil {
+		log.Panic("Error while getting stat : ", err)
+	}
+	// get the size
+	size := fi.Size()
+	return size
+}
+
 var gt GlobalTopic
 
 // CreateStream ensures the successful connection to start stream
@@ -80,14 +90,14 @@ func (s *Server) CreateStream(pconn *proto.Connect, stream proto.Broadcast_Creat
 		gt.topics = append(gt.topics, payload)
 	} else {
 		fmt.Println("old topic found")
-		payload := TopicSub{
-			subs: 1,
-		}
-		gt.topics = append(gt.topics, payload)
+		// payload := TopicSub{
+		// 	subs: 1,
+		// }
+		// gt.topics = append(gt.topics, payload)
 	}
 	s.Connection = append(s.Connection, conn)
-	fmt.Println("CONN is HERE", &conn)
-	fmt.Println(gt)
+	// fmt.Println("CONN is HERE", &conn)
+	// fmt.Println(gt)
 	return <-conn.error
 }
 
@@ -105,7 +115,10 @@ func (s *Server) BroadcastMessage(ctx context.Context, msg *proto.Message) (*pro
 			if conn.active && conn.topic.Name == msg.Topic.Name {
 				for idx, ts := range gt.topics {
 					if ts.topic.Id == conn.topic.Id {
+						initSub := gt.topics[idx].subs
 						gt.topics[idx].messages = append(gt.topics[idx].messages, *msg)
+						gt.topics[idx].subs = initSub + msg.Id
+						fmt.Println(gt.topics[idx])
 					}
 				}
 				err := conn.stream.Send(msg)
@@ -116,7 +129,7 @@ func (s *Server) BroadcastMessage(ctx context.Context, msg *proto.Message) (*pro
 					conn.error <- err
 
 				}
-				fmt.Println(gt)
+				// fmt.Println(gt)
 				grpcLog.Info("Sending message to topic: ", conn.topic)
 
 			}
