@@ -16,8 +16,13 @@ import (
 	"google.golang.org/grpc"
 )
 
+type offset struct {
+	idx int64
+}
+
 var client proto.BroadcastClient
 var wait *sync.WaitGroup
+var o offset
 
 func init() {
 	wait = &sync.WaitGroup{}
@@ -56,6 +61,7 @@ func connect(user *proto.User, topic *proto.Topic) error {
 
 func main() {
 	timestamp := time.Now()
+	o.idx = 1
 
 	done := make(chan int)
 
@@ -93,7 +99,7 @@ func main() {
 		scanner := bufio.NewScanner(os.Stdin)
 		for scanner.Scan() {
 			msg := &proto.Message{
-				Id:        user.Id,
+				Id:        o.idx,
 				Content:   scanner.Text(),
 				Timestamp: timestamp.String(),
 				Topic:     topic,
@@ -104,6 +110,7 @@ func main() {
 				fmt.Printf("Error Sending Message: %v", err)
 				break
 			}
+			o.idx = o.idx + 1
 		}
 
 	}()
