@@ -64,8 +64,8 @@ func main() {
 
 	flag.Parse()
 
-	UserID := sha256.Sum256([]byte(timestamp.String() + *name))
-	TopicID := sha256.Sum256([]byte(timestamp.String() + *topicName))
+	UserID := sha256.Sum256([]byte("USER" + *name))
+	TopicID := sha256.Sum256([]byte("TOPIC" + *topicName))
 
 	conn, err := grpc.Dial("localhost:8000", grpc.WithInsecure())
 	if err != nil {

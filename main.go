@@ -44,14 +44,14 @@ type TopicSub struct {
 
 // GlobalTopic hold all topic data
 type GlobalTopic struct {
-	topics []string
+	topics []TopicSub
 }
 
 // Find takes a slice and looks for an element in it. If found it will
 // return it's key, otherwise it will return -1 and a bool of false.
-func Find(slice []string, val string) (int, bool) {
+func Find(slice []TopicSub, val string) (int, bool) {
 	for i, item := range slice {
-		if item == val {
+		if item.topic.Name == val {
 			return i, true
 		}
 	}
@@ -71,9 +71,13 @@ func (s *Server) CreateStream(pconn *proto.Connect, stream proto.Broadcast_Creat
 	}
 
 	_, result := Find(gt.topics, conn.topic.Name)
-	if result == true {
-		fmt.Println("New topic discovered")
-		gt.topics = append(gt.topics, conn.topic.Name)
+	if result == false {
+		fmt.Println("New topic discovered", conn.topic.Name)
+		payload := TopicSub{
+			topic: conn.topic,
+			subs:  0,
+		}
+		gt.topics = append(gt.topics, payload)
 	} else {
 		fmt.Println("old topic found")
 	}
