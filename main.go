@@ -80,6 +80,10 @@ func (s *Server) CreateStream(pconn *proto.Connect, stream proto.Broadcast_Creat
 		gt.topics = append(gt.topics, payload)
 	} else {
 		fmt.Println("old topic found")
+		payload := TopicSub{
+			subs: 1,
+		}
+		gt.topics = append(gt.topics, payload)
 	}
 	s.Connection = append(s.Connection, conn)
 	fmt.Println("CONN is HERE", &conn)
@@ -99,6 +103,11 @@ func (s *Server) BroadcastMessage(ctx context.Context, msg *proto.Message) (*pro
 			defer wait.Done()
 
 			if conn.active && conn.topic.Name == msg.Topic.Name {
+				for idx, ts := range gt.topics {
+					if ts.topic.Id == conn.topic.Id {
+						gt.topics[idx].messages = append(gt.topics[idx].messages, *msg)
+					}
+				}
 				err := conn.stream.Send(msg)
 				conn.messages = append(conn.messages, *msg)
 				if err != nil {
@@ -107,7 +116,7 @@ func (s *Server) BroadcastMessage(ctx context.Context, msg *proto.Message) (*pro
 					conn.error <- err
 
 				}
-				fmt.Println(conn)
+				fmt.Println(gt)
 				grpcLog.Info("Sending message to topic: ", conn.topic)
 
 			}
