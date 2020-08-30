@@ -1,26 +1,21 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 )
 
-type mad struct {
-	mes []string
+type Employee struct {
+	Name   string `json:"empname"`
+	Number int    `json:"empid"`
 }
 
-var m mad
-
 func main() {
-	m.mes = append(m.mes, "one")
-	m.mes = append(m.mes, "two")
-	m.mes = append(m.mes, "three")
-	m.mes = append(m.mes, "four")
-	m.mes = append(m.mes, "fove")
-
-	for idx, val := range m.mes {
-		fmt.Println(idx, ",", val)
-		if val == "four" {
-			fmt.Println(m.mes[idx])
-		}
+	emp := &Employee{Name: "Rocky", Number: 5454}
+	e, err := json.Marshal(emp)
+	if err != nil {
+		fmt.Println(err)
+		return
 	}
+	fmt.Println(string(e))
 }
