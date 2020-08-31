@@ -177,7 +177,7 @@ func (s *Server) QueueMessage(ctx context.Context, msg *proto.Message) (*proto.C
 
 	}(msg)
 
-	fmt.Println(gt)
+	// fmt.Println(gt)
 	// writeToFile("first.json", gt)
 
 	go func() {
