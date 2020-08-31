@@ -112,6 +112,38 @@ func (s *Server) CreateStream(pconn *proto.Connect, stream proto.Broadcast_Creat
 	return <-conn.error
 }
 
+// QueueMessage is responsible for sending out messages
+func (s *Server) QueueMessage(ctx context.Context, msg *proto.Message) (*proto.Close, error) {
+	wait := sync.WaitGroup{}
+	done := make(chan int)
+
+	wait.Add(1)
+
+	go func(msg *proto.Message) {
+		defer wait.Done()
+		for idx, ts := range gt.Topics {
+			if ts.Topic.Id == msg.Topic.Id {
+				initSub := gt.Topics[idx].Subs
+				fmt.Println(initSub)
+				gt.Topics[idx].Messages = append(gt.Topics[idx].Messages, *msg)
+				gt.Topics[idx].Subs = initSub + 1
+				// fmt.Println(gt.topics[idx])
+			}
+		}
+
+	}(msg)
+
+	fmt.Println(gt)
+	// writeToFile("first.json", gt)
+
+	go func() {
+		wait.Wait()
+		close(done)
+	}()
+
+	return &proto.Close{}, nil
+}
+
 // BroadcastMessage is responsible for sending out messages
 func (s *Server) BroadcastMessage(ctx context.Context, msg *proto.Message) (*proto.Close, error) {
 	wait := sync.WaitGroup{}
@@ -124,25 +156,13 @@ func (s *Server) BroadcastMessage(ctx context.Context, msg *proto.Message) (*pro
 			defer wait.Done()
 
 			if conn.Active && conn.Topic.Name == msg.Topic.Name {
-				for idx, ts := range gt.Topics {
-					if ts.Topic.Id == conn.Topic.Id {
-						initSub := gt.Topics[idx].Subs
-						gt.Topics[idx].Messages = append(gt.Topics[idx].Messages, *msg)
-						gt.Topics[idx].Subs = initSub + msg.Id
-						// fmt.Println(gt.topics[idx])
-					}
-				}
 				err := conn.stream.Send(msg)
-				conn.Messages = append(conn.Messages, *msg)
 				if err != nil {
 					grpcLog.Errorf("Error with Stream: %v , on topic: %v - Error: %v", conn.stream, conn.Topic, err)
 					conn.Active = false
 					conn.error <- err
 
 				}
-
-				fmt.Println(gt)
-				writeToFile("first.json", gt)
 				grpcLog.Info("Sending message to topic: ", conn.Topic)
 
 			}
