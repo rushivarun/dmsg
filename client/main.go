@@ -110,6 +110,11 @@ func main() {
 				fmt.Printf("Error Sending Message: %v", err)
 				break
 			}
+			_, Qerr := client.QueueMessage(context.Background(), msg)
+			if Qerr != nil {
+				fmt.Printf("Error Queueing Message: %v", err)
+				break
+			}
 			o.idx = o.idx + 1
 		}
 
