@@ -49,6 +49,25 @@ type GlobalTopic struct {
 	Topics []TopicSub `json:"topics"`
 }
 
+// TopicOffset is a struct in order to keep track of the latest offset
+// This has to kept local to the server...
+type TopicOffset struct {
+	TopicID string `json:"TopicID"`
+	Offset  int64  `json:"Offset"`
+}
+
+// LocalStat is an array of all the Topics with their respective latest offsets.
+// This has to be kept local to the server...
+type LocalStat struct {
+	TopicOffset []TopicOffset `json:"TopicOffset"`
+}
+
+// LS Instantiate LocalStat structure for topic data to be appended.
+var LS LocalStat
+
+// Instantiate Global topic to keep track of jsonable files to be distributed.
+var gt GlobalTopic
+
 // Find takes a slice and looks for an element in it. If found it will
 // return it's key, otherwise it will return -1 and a bool of false.
 func Find(slice []TopicSub, val string) (int, bool) {
@@ -79,7 +98,24 @@ func writeToFile(name string, globalT GlobalTopic) error {
 	return WriteErr
 }
 
-var gt GlobalTopic
+func updateOffest(topicID string, offset int64) bool {
+	for idx, val := range LS.TopicOffset {
+		if val.TopicID == topicID {
+			LS.TopicOffset[idx].Offset = offset
+		}
+	}
+	return true
+}
+
+func getLatestOffset(topicID string) int64 {
+	var offset int64
+	for _, val := range LS.TopicOffset {
+		if val.TopicID == topicID {
+			offset = val.Offset
+		}
+	}
+	return offset
+}
 
 // CreateStream ensures the successful connection to start stream
 func (s *Server) CreateStream(pconn *proto.Connect, stream proto.Broadcast_CreateStreamServer) error {
@@ -118,16 +154,24 @@ func (s *Server) QueueMessage(ctx context.Context, msg *proto.Message) (*proto.C
 	done := make(chan int)
 
 	wait.Add(1)
-
 	go func(msg *proto.Message) {
 		defer wait.Done()
 		for idx, ts := range gt.Topics {
 			if ts.Topic.Id == msg.Topic.Id {
-				initSub := gt.Topics[idx].Subs
-				fmt.Println(initSub)
+				payload := TopicOffset{
+					TopicID: ts.Topic.Id,
+					Offset:  gt.Topics[idx].Subs,
+				}
+				LS.TopicOffset = append(LS.TopicOffset, payload)
+				lastOffset := getLatestOffset(ts.Topic.Id)
+				latestOffset := lastOffset + 1
+				msg.Id = lastOffset
 				gt.Topics[idx].Messages = append(gt.Topics[idx].Messages, *msg)
-				gt.Topics[idx].Subs = initSub + 1
-				// fmt.Println(gt.topics[idx])
+				gt.Topics[idx].Subs = latestOffset
+
+				updateOffest(ts.Topic.Id, latestOffset)
+
+				// fmt.Println(gt.Topics[idx].Subs)
 			}
 		}
 
