@@ -23,7 +23,7 @@ cd client
 go run main.go -N Rushi -T politics
 ```
 
-## Upcomng...
+## Upcoming...
 * Async pub-sub queuing
 * Sync pub-sub
 
