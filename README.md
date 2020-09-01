@@ -1,5 +1,5 @@
 # dmsg
-Distributed messaging system
+async pub-sub messaging system
 
 ## To get started
 Install go 1.15, git
@@ -22,5 +22,9 @@ docker build -t dmsg-server .
 cd client
 go run main.go -N Rushi -T politics
 ```
+
+## Upcomng...
+* Async pub-sub queuing
+* Sync pub-sub
 
 
