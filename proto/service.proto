@@ -3,13 +3,15 @@ syntax = "proto3";
 package proto;
 
 message User {
-    string name = 1;
-    string id = 2;
+    string id = 1;
+    repeated string scope = 2;
 }
 
 message Topic {
-    string id = 1;
-    string name = 2;
+    string name = 1;
+    string id = 2;
+    int64 subscription = 3;
+    repeated string scope = 4;
 }
 
 message Connect {
@@ -19,16 +21,18 @@ message Connect {
 }
 
 message Message {
-    int64 id = 1;
-    string content = 2;
-    string timestamp = 3;
-    Topic topic = 4;
+    string id = 1;
+    Topic topic = 2;
+    int64 Offset = 3;
+    User user = 4;
+    string content = 5;
+    string timestamp = 6;
 }
 
 message Close{}
 
-service Broadcast {
-    rpc CreateStream (Connect) returns (stream Message);
-    rpc BroadcastMessage (Message) returns (Close);
-    rpc QueueMessage (Message) returns (Close);
+service Deploy {
+    rpc CreateStream(Connect) returns (stream Message);
+    rpc DeployMessage(Message) returns (Close);
+    rpc QueueMessage(Message) returns (Close);
 }

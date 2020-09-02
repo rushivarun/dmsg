@@ -34,8 +34,8 @@ type User struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Id   string `protobuf:"bytes,2,opt,name=id,proto3" json:"id,omitempty"`
+	Id    string   `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Scope []string `protobuf:"bytes,2,rep,name=scope,proto3" json:"scope,omitempty"`
 }
 
 func (x *User) Reset() {
@@ -70,13 +70,6 @@ func (*User) Descriptor() ([]byte, []int) {
 	return file_service_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *User) GetName() string {
-	if x != nil {
-		return x.Name
-	}
-	return ""
-}
-
 func (x *User) GetId() string {
 	if x != nil {
 		return x.Id
@@ -84,13 +77,22 @@ func (x *User) GetId() string {
 	return ""
 }
 
+func (x *User) GetScope() []string {
+	if x != nil {
+		return x.Scope
+	}
+	return nil
+}
+
 type Topic struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id   string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Name         string   `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Id           string   `protobuf:"bytes,2,opt,name=id,proto3" json:"id,omitempty"`
+	Subscription int64    `protobuf:"varint,3,opt,name=subscription,proto3" json:"subscription,omitempty"`
+	Scope        []string `protobuf:"bytes,4,rep,name=scope,proto3" json:"scope,omitempty"`
 }
 
 func (x *Topic) Reset() {
@@ -125,6 +127,13 @@ func (*Topic) Descriptor() ([]byte, []int) {
 	return file_service_proto_rawDescGZIP(), []int{1}
 }
 
+func (x *Topic) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
 func (x *Topic) GetId() string {
 	if x != nil {
 		return x.Id
@@ -132,11 +141,18 @@ func (x *Topic) GetId() string {
 	return ""
 }
 
-func (x *Topic) GetName() string {
+func (x *Topic) GetSubscription() int64 {
 	if x != nil {
-		return x.Name
+		return x.Subscription
 	}
-	return ""
+	return 0
+}
+
+func (x *Topic) GetScope() []string {
+	if x != nil {
+		return x.Scope
+	}
+	return nil
 }
 
 type Connect struct {
@@ -207,10 +223,12 @@ type Message struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        int64  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Content   string `protobuf:"bytes,2,opt,name=content,proto3" json:"content,omitempty"`
-	Timestamp string `protobuf:"bytes,3,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
-	Topic     *Topic `protobuf:"bytes,4,opt,name=topic,proto3" json:"topic,omitempty"`
+	Id        string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Topic     *Topic `protobuf:"bytes,2,opt,name=topic,proto3" json:"topic,omitempty"`
+	Offset    int64  `protobuf:"varint,3,opt,name=Offset,proto3" json:"Offset,omitempty"`
+	User      *User  `protobuf:"bytes,4,opt,name=user,proto3" json:"user,omitempty"`
+	Content   string `protobuf:"bytes,5,opt,name=content,proto3" json:"content,omitempty"`
+	Timestamp string `protobuf:"bytes,6,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
 }
 
 func (x *Message) Reset() {
@@ -245,11 +263,32 @@ func (*Message) Descriptor() ([]byte, []int) {
 	return file_service_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *Message) GetId() int64 {
+func (x *Message) GetId() string {
 	if x != nil {
 		return x.Id
 	}
+	return ""
+}
+
+func (x *Message) GetTopic() *Topic {
+	if x != nil {
+		return x.Topic
+	}
+	return nil
+}
+
+func (x *Message) GetOffset() int64 {
+	if x != nil {
+		return x.Offset
+	}
 	return 0
+}
+
+func (x *Message) GetUser() *User {
+	if x != nil {
+		return x.User
+	}
+	return nil
 }
 
 func (x *Message) GetContent() string {
@@ -264,13 +303,6 @@ func (x *Message) GetTimestamp() string {
 		return x.Timestamp
 	}
 	return ""
-}
-
-func (x *Message) GetTopic() *Topic {
-	if x != nil {
-		return x.Topic
-	}
-	return nil
 }
 
 type Close struct {
@@ -315,32 +347,39 @@ var File_service_proto protoreflect.FileDescriptor
 
 var file_service_proto_rawDesc = []byte{
 	0x0a, 0x0d, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12,
-	0x05, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0x2a, 0x0a, 0x04, 0x55, 0x73, 0x65, 0x72, 0x12, 0x12,
-	0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6e, 0x61,
-	0x6d, 0x65, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02,
-	0x69, 0x64, 0x22, 0x2b, 0x0a, 0x05, 0x54, 0x6f, 0x70, 0x69, 0x63, 0x12, 0x0e, 0x0a, 0x02, 0x69,
-	0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x64, 0x12, 0x12, 0x0a, 0x04, 0x6e,
-	0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x22,
-	0x66, 0x0a, 0x07, 0x43, 0x6f, 0x6e, 0x6e, 0x65, 0x63, 0x74, 0x12, 0x1f, 0x0a, 0x04, 0x75, 0x73,
-	0x65, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0b, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f,
-	0x2e, 0x55, 0x73, 0x65, 0x72, 0x52, 0x04, 0x75, 0x73, 0x65, 0x72, 0x12, 0x16, 0x0a, 0x06, 0x61,
-	0x63, 0x74, 0x69, 0x76, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x08, 0x52, 0x06, 0x61, 0x63, 0x74,
-	0x69, 0x76, 0x65, 0x12, 0x22, 0x0a, 0x05, 0x74, 0x6f, 0x70, 0x69, 0x63, 0x18, 0x03, 0x20, 0x01,
-	0x28, 0x0b, 0x32, 0x0c, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x54, 0x6f, 0x70, 0x69, 0x63,
-	0x52, 0x05, 0x74, 0x6f, 0x70, 0x69, 0x63, 0x22, 0x75, 0x0a, 0x07, 0x4d, 0x65, 0x73, 0x73, 0x61,
-	0x67, 0x65, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x02,
-	0x69, 0x64, 0x12, 0x18, 0x0a, 0x07, 0x63, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x18, 0x02, 0x20,
-	0x01, 0x28, 0x09, 0x52, 0x07, 0x63, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x12, 0x1c, 0x0a, 0x09,
-	0x74, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52,
-	0x09, 0x74, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x12, 0x22, 0x0a, 0x05, 0x74, 0x6f,
-	0x70, 0x69, 0x63, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0c, 0x2e, 0x70, 0x72, 0x6f, 0x74,
-	0x6f, 0x2e, 0x54, 0x6f, 0x70, 0x69, 0x63, 0x52, 0x05, 0x74, 0x6f, 0x70, 0x69, 0x63, 0x22, 0x07,
-	0x0a, 0x05, 0x43, 0x6c, 0x6f, 0x73, 0x65, 0x32, 0x9d, 0x01, 0x0a, 0x09, 0x42, 0x72, 0x6f, 0x61,
-	0x64, 0x63, 0x61, 0x73, 0x74, 0x12, 0x30, 0x0a, 0x0c, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x53,
-	0x74, 0x72, 0x65, 0x61, 0x6d, 0x12, 0x0e, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x43, 0x6f,
-	0x6e, 0x6e, 0x65, 0x63, 0x74, 0x1a, 0x0e, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x4d, 0x65,
-	0x73, 0x73, 0x61, 0x67, 0x65, 0x30, 0x01, 0x12, 0x30, 0x0a, 0x10, 0x42, 0x72, 0x6f, 0x61, 0x64,
-	0x63, 0x61, 0x73, 0x74, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x12, 0x0e, 0x2e, 0x70, 0x72,
+	0x05, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0x2c, 0x0a, 0x04, 0x55, 0x73, 0x65, 0x72, 0x12, 0x0e,
+	0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x64, 0x12, 0x14,
+	0x0a, 0x05, 0x73, 0x63, 0x6f, 0x70, 0x65, 0x18, 0x02, 0x20, 0x03, 0x28, 0x09, 0x52, 0x05, 0x73,
+	0x63, 0x6f, 0x70, 0x65, 0x22, 0x65, 0x0a, 0x05, 0x54, 0x6f, 0x70, 0x69, 0x63, 0x12, 0x12, 0x0a,
+	0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d,
+	0x65, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69,
+	0x64, 0x12, 0x22, 0x0a, 0x0c, 0x73, 0x75, 0x62, 0x73, 0x63, 0x72, 0x69, 0x70, 0x74, 0x69, 0x6f,
+	0x6e, 0x18, 0x03, 0x20, 0x01, 0x28, 0x03, 0x52, 0x0c, 0x73, 0x75, 0x62, 0x73, 0x63, 0x72, 0x69,
+	0x70, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x14, 0x0a, 0x05, 0x73, 0x63, 0x6f, 0x70, 0x65, 0x18, 0x04,
+	0x20, 0x03, 0x28, 0x09, 0x52, 0x05, 0x73, 0x63, 0x6f, 0x70, 0x65, 0x22, 0x66, 0x0a, 0x07, 0x43,
+	0x6f, 0x6e, 0x6e, 0x65, 0x63, 0x74, 0x12, 0x1f, 0x0a, 0x04, 0x75, 0x73, 0x65, 0x72, 0x18, 0x01,
+	0x20, 0x01, 0x28, 0x0b, 0x32, 0x0b, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x55, 0x73, 0x65,
+	0x72, 0x52, 0x04, 0x75, 0x73, 0x65, 0x72, 0x12, 0x16, 0x0a, 0x06, 0x61, 0x63, 0x74, 0x69, 0x76,
+	0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x08, 0x52, 0x06, 0x61, 0x63, 0x74, 0x69, 0x76, 0x65, 0x12,
+	0x22, 0x0a, 0x05, 0x74, 0x6f, 0x70, 0x69, 0x63, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0c,
+	0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x54, 0x6f, 0x70, 0x69, 0x63, 0x52, 0x05, 0x74, 0x6f,
+	0x70, 0x69, 0x63, 0x22, 0xae, 0x01, 0x0a, 0x07, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x12,
+	0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x64, 0x12,
+	0x22, 0x0a, 0x05, 0x74, 0x6f, 0x70, 0x69, 0x63, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0c,
+	0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x54, 0x6f, 0x70, 0x69, 0x63, 0x52, 0x05, 0x74, 0x6f,
+	0x70, 0x69, 0x63, 0x12, 0x16, 0x0a, 0x06, 0x4f, 0x66, 0x66, 0x73, 0x65, 0x74, 0x18, 0x03, 0x20,
+	0x01, 0x28, 0x03, 0x52, 0x06, 0x4f, 0x66, 0x66, 0x73, 0x65, 0x74, 0x12, 0x1f, 0x0a, 0x04, 0x75,
+	0x73, 0x65, 0x72, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0b, 0x2e, 0x70, 0x72, 0x6f, 0x74,
+	0x6f, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x52, 0x04, 0x75, 0x73, 0x65, 0x72, 0x12, 0x18, 0x0a, 0x07,
+	0x63, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x18, 0x05, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x63,
+	0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x12, 0x1c, 0x0a, 0x09, 0x74, 0x69, 0x6d, 0x65, 0x73, 0x74,
+	0x61, 0x6d, 0x70, 0x18, 0x06, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x74, 0x69, 0x6d, 0x65, 0x73,
+	0x74, 0x61, 0x6d, 0x70, 0x22, 0x07, 0x0a, 0x05, 0x43, 0x6c, 0x6f, 0x73, 0x65, 0x32, 0x97, 0x01,
+	0x0a, 0x06, 0x44, 0x65, 0x70, 0x6c, 0x6f, 0x79, 0x12, 0x30, 0x0a, 0x0c, 0x43, 0x72, 0x65, 0x61,
+	0x74, 0x65, 0x53, 0x74, 0x72, 0x65, 0x61, 0x6d, 0x12, 0x0e, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f,
+	0x2e, 0x43, 0x6f, 0x6e, 0x6e, 0x65, 0x63, 0x74, 0x1a, 0x0e, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f,
+	0x2e, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x30, 0x01, 0x12, 0x2d, 0x0a, 0x0d, 0x44, 0x65,
+	0x70, 0x6c, 0x6f, 0x79, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x12, 0x0e, 0x2e, 0x70, 0x72,
 	0x6f, 0x74, 0x6f, 0x2e, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x1a, 0x0c, 0x2e, 0x70, 0x72,
 	0x6f, 0x74, 0x6f, 0x2e, 0x43, 0x6c, 0x6f, 0x73, 0x65, 0x12, 0x2c, 0x0a, 0x0c, 0x51, 0x75, 0x65,
 	0x75, 0x65, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x12, 0x0e, 0x2e, 0x70, 0x72, 0x6f, 0x74,
@@ -372,17 +411,18 @@ var file_service_proto_depIdxs = []int32{
 	0, // 0: proto.Connect.user:type_name -> proto.User
 	1, // 1: proto.Connect.topic:type_name -> proto.Topic
 	1, // 2: proto.Message.topic:type_name -> proto.Topic
-	2, // 3: proto.Broadcast.CreateStream:input_type -> proto.Connect
-	3, // 4: proto.Broadcast.BroadcastMessage:input_type -> proto.Message
-	3, // 5: proto.Broadcast.QueueMessage:input_type -> proto.Message
-	3, // 6: proto.Broadcast.CreateStream:output_type -> proto.Message
-	4, // 7: proto.Broadcast.BroadcastMessage:output_type -> proto.Close
-	4, // 8: proto.Broadcast.QueueMessage:output_type -> proto.Close
-	6, // [6:9] is the sub-list for method output_type
-	3, // [3:6] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	0, // 3: proto.Message.user:type_name -> proto.User
+	2, // 4: proto.Deploy.CreateStream:input_type -> proto.Connect
+	3, // 5: proto.Deploy.DeployMessage:input_type -> proto.Message
+	3, // 6: proto.Deploy.QueueMessage:input_type -> proto.Message
+	3, // 7: proto.Deploy.CreateStream:output_type -> proto.Message
+	4, // 8: proto.Deploy.DeployMessage:output_type -> proto.Close
+	4, // 9: proto.Deploy.QueueMessage:output_type -> proto.Close
+	7, // [7:10] is the sub-list for method output_type
+	4, // [4:7] is the sub-list for method input_type
+	4, // [4:4] is the sub-list for extension type_name
+	4, // [4:4] is the sub-list for extension extendee
+	0, // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_service_proto_init() }
@@ -480,29 +520,29 @@ var _ grpc.ClientConnInterface
 // is compatible with the grpc package it is being compiled against.
 const _ = grpc.SupportPackageIsVersion6
 
-// BroadcastClient is the client API for Broadcast service.
+// DeployClient is the client API for Deploy service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
-type BroadcastClient interface {
-	CreateStream(ctx context.Context, in *Connect, opts ...grpc.CallOption) (Broadcast_CreateStreamClient, error)
-	BroadcastMessage(ctx context.Context, in *Message, opts ...grpc.CallOption) (*Close, error)
+type DeployClient interface {
+	CreateStream(ctx context.Context, in *Connect, opts ...grpc.CallOption) (Deploy_CreateStreamClient, error)
+	DeployMessage(ctx context.Context, in *Message, opts ...grpc.CallOption) (*Close, error)
 	QueueMessage(ctx context.Context, in *Message, opts ...grpc.CallOption) (*Close, error)
 }
 
-type broadcastClient struct {
+type deployClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewBroadcastClient(cc grpc.ClientConnInterface) BroadcastClient {
-	return &broadcastClient{cc}
+func NewDeployClient(cc grpc.ClientConnInterface) DeployClient {
+	return &deployClient{cc}
 }
 
-func (c *broadcastClient) CreateStream(ctx context.Context, in *Connect, opts ...grpc.CallOption) (Broadcast_CreateStreamClient, error) {
-	stream, err := c.cc.NewStream(ctx, &_Broadcast_serviceDesc.Streams[0], "/proto.Broadcast/CreateStream", opts...)
+func (c *deployClient) CreateStream(ctx context.Context, in *Connect, opts ...grpc.CallOption) (Deploy_CreateStreamClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_Deploy_serviceDesc.Streams[0], "/proto.Deploy/CreateStream", opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &broadcastCreateStreamClient{stream}
+	x := &deployCreateStreamClient{stream}
 	if err := x.ClientStream.SendMsg(in); err != nil {
 		return nil, err
 	}
@@ -512,16 +552,16 @@ func (c *broadcastClient) CreateStream(ctx context.Context, in *Connect, opts ..
 	return x, nil
 }
 
-type Broadcast_CreateStreamClient interface {
+type Deploy_CreateStreamClient interface {
 	Recv() (*Message, error)
 	grpc.ClientStream
 }
 
-type broadcastCreateStreamClient struct {
+type deployCreateStreamClient struct {
 	grpc.ClientStream
 }
 
-func (x *broadcastCreateStreamClient) Recv() (*Message, error) {
+func (x *deployCreateStreamClient) Recv() (*Message, error) {
 	m := new(Message)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
@@ -529,123 +569,123 @@ func (x *broadcastCreateStreamClient) Recv() (*Message, error) {
 	return m, nil
 }
 
-func (c *broadcastClient) BroadcastMessage(ctx context.Context, in *Message, opts ...grpc.CallOption) (*Close, error) {
+func (c *deployClient) DeployMessage(ctx context.Context, in *Message, opts ...grpc.CallOption) (*Close, error) {
 	out := new(Close)
-	err := c.cc.Invoke(ctx, "/proto.Broadcast/BroadcastMessage", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/proto.Deploy/DeployMessage", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *broadcastClient) QueueMessage(ctx context.Context, in *Message, opts ...grpc.CallOption) (*Close, error) {
+func (c *deployClient) QueueMessage(ctx context.Context, in *Message, opts ...grpc.CallOption) (*Close, error) {
 	out := new(Close)
-	err := c.cc.Invoke(ctx, "/proto.Broadcast/QueueMessage", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/proto.Deploy/QueueMessage", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// BroadcastServer is the server API for Broadcast service.
-type BroadcastServer interface {
-	CreateStream(*Connect, Broadcast_CreateStreamServer) error
-	BroadcastMessage(context.Context, *Message) (*Close, error)
+// DeployServer is the server API for Deploy service.
+type DeployServer interface {
+	CreateStream(*Connect, Deploy_CreateStreamServer) error
+	DeployMessage(context.Context, *Message) (*Close, error)
 	QueueMessage(context.Context, *Message) (*Close, error)
 }
 
-// UnimplementedBroadcastServer can be embedded to have forward compatible implementations.
-type UnimplementedBroadcastServer struct {
+// UnimplementedDeployServer can be embedded to have forward compatible implementations.
+type UnimplementedDeployServer struct {
 }
 
-func (*UnimplementedBroadcastServer) CreateStream(*Connect, Broadcast_CreateStreamServer) error {
+func (*UnimplementedDeployServer) CreateStream(*Connect, Deploy_CreateStreamServer) error {
 	return status.Errorf(codes.Unimplemented, "method CreateStream not implemented")
 }
-func (*UnimplementedBroadcastServer) BroadcastMessage(context.Context, *Message) (*Close, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method BroadcastMessage not implemented")
+func (*UnimplementedDeployServer) DeployMessage(context.Context, *Message) (*Close, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeployMessage not implemented")
 }
-func (*UnimplementedBroadcastServer) QueueMessage(context.Context, *Message) (*Close, error) {
+func (*UnimplementedDeployServer) QueueMessage(context.Context, *Message) (*Close, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method QueueMessage not implemented")
 }
 
-func RegisterBroadcastServer(s *grpc.Server, srv BroadcastServer) {
-	s.RegisterService(&_Broadcast_serviceDesc, srv)
+func RegisterDeployServer(s *grpc.Server, srv DeployServer) {
+	s.RegisterService(&_Deploy_serviceDesc, srv)
 }
 
-func _Broadcast_CreateStream_Handler(srv interface{}, stream grpc.ServerStream) error {
+func _Deploy_CreateStream_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(Connect)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(BroadcastServer).CreateStream(m, &broadcastCreateStreamServer{stream})
+	return srv.(DeployServer).CreateStream(m, &deployCreateStreamServer{stream})
 }
 
-type Broadcast_CreateStreamServer interface {
+type Deploy_CreateStreamServer interface {
 	Send(*Message) error
 	grpc.ServerStream
 }
 
-type broadcastCreateStreamServer struct {
+type deployCreateStreamServer struct {
 	grpc.ServerStream
 }
 
-func (x *broadcastCreateStreamServer) Send(m *Message) error {
+func (x *deployCreateStreamServer) Send(m *Message) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-func _Broadcast_BroadcastMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Deploy_DeployMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Message)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(BroadcastServer).BroadcastMessage(ctx, in)
+		return srv.(DeployServer).DeployMessage(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/proto.Broadcast/BroadcastMessage",
+		FullMethod: "/proto.Deploy/DeployMessage",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(BroadcastServer).BroadcastMessage(ctx, req.(*Message))
+		return srv.(DeployServer).DeployMessage(ctx, req.(*Message))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Broadcast_QueueMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Deploy_QueueMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Message)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(BroadcastServer).QueueMessage(ctx, in)
+		return srv.(DeployServer).QueueMessage(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/proto.Broadcast/QueueMessage",
+		FullMethod: "/proto.Deploy/QueueMessage",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(BroadcastServer).QueueMessage(ctx, req.(*Message))
+		return srv.(DeployServer).QueueMessage(ctx, req.(*Message))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-var _Broadcast_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "proto.Broadcast",
-	HandlerType: (*BroadcastServer)(nil),
+var _Deploy_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "proto.Deploy",
+	HandlerType: (*DeployServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "BroadcastMessage",
-			Handler:    _Broadcast_BroadcastMessage_Handler,
+			MethodName: "DeployMessage",
+			Handler:    _Deploy_DeployMessage_Handler,
 		},
 		{
 			MethodName: "QueueMessage",
-			Handler:    _Broadcast_QueueMessage_Handler,
+			Handler:    _Deploy_QueueMessage_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
 		{
 			StreamName:    "CreateStream",
-			Handler:       _Broadcast_CreateStream_Handler,
+			Handler:       _Deploy_CreateStream_Handler,
 			ServerStreams: true,
 		},
 	},
