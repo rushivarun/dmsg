@@ -17,7 +17,7 @@ docker build -t dmsg-server .
 
 ### Run server docker container
 ```
-docker run dmsg-server
+docker run -p 8000:8000 dmsg-server
 ```
 
 ### Run client nodes
