@@ -29,7 +29,12 @@ go run main.go -N Rushi -T politics
 ```
 
 ## Upcoming...
-* Async pub-sub queuing
-* Sync pub-sub
+* RBAC
+* ASYNC Pub sub
+* SYNC Pub sub
+* ASYNC pub sub queue
+* ASYNC references
+* Larger message types
+* Distributed file system
 
 
