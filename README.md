@@ -30,9 +30,7 @@ go run main.go -N Rushi -T politics
 
 ## Upcoming...
 * RBAC
-* ASYNC Pub sub
 * SYNC Pub sub
-* ASYNC pub sub queue
 * ASYNC references
 * Larger message types
 * Distributed file system
