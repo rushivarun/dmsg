@@ -305,6 +305,108 @@ func (x *Message) GetTimestamp() string {
 	return ""
 }
 
+type TopicWise struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Topic   *Topic     `protobuf:"bytes,1,opt,name=topic,proto3" json:"topic,omitempty"`
+	Message []*Message `protobuf:"bytes,2,rep,name=message,proto3" json:"message,omitempty"`
+}
+
+func (x *TopicWise) Reset() {
+	*x = TopicWise{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_service_proto_msgTypes[4]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *TopicWise) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TopicWise) ProtoMessage() {}
+
+func (x *TopicWise) ProtoReflect() protoreflect.Message {
+	mi := &file_service_proto_msgTypes[4]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TopicWise.ProtoReflect.Descriptor instead.
+func (*TopicWise) Descriptor() ([]byte, []int) {
+	return file_service_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *TopicWise) GetTopic() *Topic {
+	if x != nil {
+		return x.Topic
+	}
+	return nil
+}
+
+func (x *TopicWise) GetMessage() []*Message {
+	if x != nil {
+		return x.Message
+	}
+	return nil
+}
+
+type GlobalTopic struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	TopicWise []*TopicWise `protobuf:"bytes,1,rep,name=topicWise,proto3" json:"topicWise,omitempty"`
+}
+
+func (x *GlobalTopic) Reset() {
+	*x = GlobalTopic{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_service_proto_msgTypes[5]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GlobalTopic) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GlobalTopic) ProtoMessage() {}
+
+func (x *GlobalTopic) ProtoReflect() protoreflect.Message {
+	mi := &file_service_proto_msgTypes[5]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GlobalTopic.ProtoReflect.Descriptor instead.
+func (*GlobalTopic) Descriptor() ([]byte, []int) {
+	return file_service_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *GlobalTopic) GetTopicWise() []*TopicWise {
+	if x != nil {
+		return x.TopicWise
+	}
+	return nil
+}
+
 type Close struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -314,7 +416,7 @@ type Close struct {
 func (x *Close) Reset() {
 	*x = Close{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_service_proto_msgTypes[4]
+		mi := &file_service_proto_msgTypes[6]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -327,7 +429,7 @@ func (x *Close) String() string {
 func (*Close) ProtoMessage() {}
 
 func (x *Close) ProtoReflect() protoreflect.Message {
-	mi := &file_service_proto_msgTypes[4]
+	mi := &file_service_proto_msgTypes[6]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -340,7 +442,7 @@ func (x *Close) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Close.ProtoReflect.Descriptor instead.
 func (*Close) Descriptor() ([]byte, []int) {
-	return file_service_proto_rawDescGZIP(), []int{4}
+	return file_service_proto_rawDescGZIP(), []int{6}
 }
 
 var File_service_proto protoreflect.FileDescriptor
@@ -374,17 +476,27 @@ var file_service_proto_rawDesc = []byte{
 	0x63, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x18, 0x05, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x63,
 	0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x12, 0x1c, 0x0a, 0x09, 0x74, 0x69, 0x6d, 0x65, 0x73, 0x74,
 	0x61, 0x6d, 0x70, 0x18, 0x06, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x74, 0x69, 0x6d, 0x65, 0x73,
-	0x74, 0x61, 0x6d, 0x70, 0x22, 0x07, 0x0a, 0x05, 0x43, 0x6c, 0x6f, 0x73, 0x65, 0x32, 0x97, 0x01,
-	0x0a, 0x06, 0x44, 0x65, 0x70, 0x6c, 0x6f, 0x79, 0x12, 0x30, 0x0a, 0x0c, 0x43, 0x72, 0x65, 0x61,
-	0x74, 0x65, 0x53, 0x74, 0x72, 0x65, 0x61, 0x6d, 0x12, 0x0e, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f,
-	0x2e, 0x43, 0x6f, 0x6e, 0x6e, 0x65, 0x63, 0x74, 0x1a, 0x0e, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f,
-	0x2e, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x30, 0x01, 0x12, 0x2d, 0x0a, 0x0d, 0x44, 0x65,
-	0x70, 0x6c, 0x6f, 0x79, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x12, 0x0e, 0x2e, 0x70, 0x72,
-	0x6f, 0x74, 0x6f, 0x2e, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x1a, 0x0c, 0x2e, 0x70, 0x72,
-	0x6f, 0x74, 0x6f, 0x2e, 0x43, 0x6c, 0x6f, 0x73, 0x65, 0x12, 0x2c, 0x0a, 0x0c, 0x51, 0x75, 0x65,
-	0x75, 0x65, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x12, 0x0e, 0x2e, 0x70, 0x72, 0x6f, 0x74,
-	0x6f, 0x2e, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x1a, 0x0c, 0x2e, 0x70, 0x72, 0x6f, 0x74,
-	0x6f, 0x2e, 0x43, 0x6c, 0x6f, 0x73, 0x65, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x74, 0x61, 0x6d, 0x70, 0x22, 0x59, 0x0a, 0x09, 0x54, 0x6f, 0x70, 0x69, 0x63, 0x57, 0x69, 0x73,
+	0x65, 0x12, 0x22, 0x0a, 0x05, 0x74, 0x6f, 0x70, 0x69, 0x63, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b,
+	0x32, 0x0c, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x54, 0x6f, 0x70, 0x69, 0x63, 0x52, 0x05,
+	0x74, 0x6f, 0x70, 0x69, 0x63, 0x12, 0x28, 0x0a, 0x07, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65,
+	0x18, 0x02, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x0e, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x4d,
+	0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x52, 0x07, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x22,
+	0x3d, 0x0a, 0x0b, 0x47, 0x6c, 0x6f, 0x62, 0x61, 0x6c, 0x54, 0x6f, 0x70, 0x69, 0x63, 0x12, 0x2e,
+	0x0a, 0x09, 0x74, 0x6f, 0x70, 0x69, 0x63, 0x57, 0x69, 0x73, 0x65, 0x18, 0x01, 0x20, 0x03, 0x28,
+	0x0b, 0x32, 0x10, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x54, 0x6f, 0x70, 0x69, 0x63, 0x57,
+	0x69, 0x73, 0x65, 0x52, 0x09, 0x74, 0x6f, 0x70, 0x69, 0x63, 0x57, 0x69, 0x73, 0x65, 0x22, 0x07,
+	0x0a, 0x05, 0x43, 0x6c, 0x6f, 0x73, 0x65, 0x32, 0x97, 0x01, 0x0a, 0x06, 0x44, 0x65, 0x70, 0x6c,
+	0x6f, 0x79, 0x12, 0x30, 0x0a, 0x0c, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x53, 0x74, 0x72, 0x65,
+	0x61, 0x6d, 0x12, 0x0e, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x43, 0x6f, 0x6e, 0x6e, 0x65,
+	0x63, 0x74, 0x1a, 0x0e, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x4d, 0x65, 0x73, 0x73, 0x61,
+	0x67, 0x65, 0x30, 0x01, 0x12, 0x2d, 0x0a, 0x0d, 0x44, 0x65, 0x70, 0x6c, 0x6f, 0x79, 0x4d, 0x65,
+	0x73, 0x73, 0x61, 0x67, 0x65, 0x12, 0x0e, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x4d, 0x65,
+	0x73, 0x73, 0x61, 0x67, 0x65, 0x1a, 0x0c, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x43, 0x6c,
+	0x6f, 0x73, 0x65, 0x12, 0x2c, 0x0a, 0x0c, 0x51, 0x75, 0x65, 0x75, 0x65, 0x4d, 0x65, 0x73, 0x73,
+	0x61, 0x67, 0x65, 0x12, 0x0e, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x4d, 0x65, 0x73, 0x73,
+	0x61, 0x67, 0x65, 0x1a, 0x0c, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x43, 0x6c, 0x6f, 0x73,
+	0x65, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -399,30 +511,35 @@ func file_service_proto_rawDescGZIP() []byte {
 	return file_service_proto_rawDescData
 }
 
-var file_service_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_service_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_service_proto_goTypes = []interface{}{
-	(*User)(nil),    // 0: proto.User
-	(*Topic)(nil),   // 1: proto.Topic
-	(*Connect)(nil), // 2: proto.Connect
-	(*Message)(nil), // 3: proto.Message
-	(*Close)(nil),   // 4: proto.Close
+	(*User)(nil),        // 0: proto.User
+	(*Topic)(nil),       // 1: proto.Topic
+	(*Connect)(nil),     // 2: proto.Connect
+	(*Message)(nil),     // 3: proto.Message
+	(*TopicWise)(nil),   // 4: proto.TopicWise
+	(*GlobalTopic)(nil), // 5: proto.GlobalTopic
+	(*Close)(nil),       // 6: proto.Close
 }
 var file_service_proto_depIdxs = []int32{
-	0, // 0: proto.Connect.user:type_name -> proto.User
-	1, // 1: proto.Connect.topic:type_name -> proto.Topic
-	1, // 2: proto.Message.topic:type_name -> proto.Topic
-	0, // 3: proto.Message.user:type_name -> proto.User
-	2, // 4: proto.Deploy.CreateStream:input_type -> proto.Connect
-	3, // 5: proto.Deploy.DeployMessage:input_type -> proto.Message
-	3, // 6: proto.Deploy.QueueMessage:input_type -> proto.Message
-	3, // 7: proto.Deploy.CreateStream:output_type -> proto.Message
-	4, // 8: proto.Deploy.DeployMessage:output_type -> proto.Close
-	4, // 9: proto.Deploy.QueueMessage:output_type -> proto.Close
-	7, // [7:10] is the sub-list for method output_type
-	4, // [4:7] is the sub-list for method input_type
-	4, // [4:4] is the sub-list for extension type_name
-	4, // [4:4] is the sub-list for extension extendee
-	0, // [0:4] is the sub-list for field type_name
+	0,  // 0: proto.Connect.user:type_name -> proto.User
+	1,  // 1: proto.Connect.topic:type_name -> proto.Topic
+	1,  // 2: proto.Message.topic:type_name -> proto.Topic
+	0,  // 3: proto.Message.user:type_name -> proto.User
+	1,  // 4: proto.TopicWise.topic:type_name -> proto.Topic
+	3,  // 5: proto.TopicWise.message:type_name -> proto.Message
+	4,  // 6: proto.GlobalTopic.topicWise:type_name -> proto.TopicWise
+	2,  // 7: proto.Deploy.CreateStream:input_type -> proto.Connect
+	3,  // 8: proto.Deploy.DeployMessage:input_type -> proto.Message
+	3,  // 9: proto.Deploy.QueueMessage:input_type -> proto.Message
+	3,  // 10: proto.Deploy.CreateStream:output_type -> proto.Message
+	6,  // 11: proto.Deploy.DeployMessage:output_type -> proto.Close
+	6,  // 12: proto.Deploy.QueueMessage:output_type -> proto.Close
+	10, // [10:13] is the sub-list for method output_type
+	7,  // [7:10] is the sub-list for method input_type
+	7,  // [7:7] is the sub-list for extension type_name
+	7,  // [7:7] is the sub-list for extension extendee
+	0,  // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_service_proto_init() }
@@ -480,6 +597,30 @@ func file_service_proto_init() {
 			}
 		}
 		file_service_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*TopicWise); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_service_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GlobalTopic); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_service_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*Close); i {
 			case 0:
 				return &v.state
@@ -498,7 +639,7 @@ func file_service_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_service_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

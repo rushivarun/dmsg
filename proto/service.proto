@@ -29,6 +29,15 @@ message Message {
     string timestamp = 6;
 }
 
+message TopicWise {
+    Topic topic = 1;
+    repeated Message message = 2;
+}
+
+message GlobalTopic {
+    repeated TopicWise topicWise = 1;
+}
+
 message Close{}
 
 service Deploy {
