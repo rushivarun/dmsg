@@ -31,7 +31,8 @@ message Message {
 
 message TopicWise {
     Topic topic = 1;
-    repeated Message message = 2;
+    int64 subs = 2;
+    repeated Message message = 3;
 }
 
 message GlobalTopic {

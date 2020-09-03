@@ -9,6 +9,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"sync"
 
 	"google.golang.org/grpc"
 	glog "google.golang.org/grpc/grpclog"
@@ -148,12 +149,77 @@ func (s *Server) CreateStream(pconn *proto.Connect, stream proto.Deploy_CreateSt
 	return <-dispatch
 }
 
+// DeployMessage produces ASYNC pub-sub
 func (s *Server) DeployMessage(ctx context.Context, msg *proto.Message) (*proto.Close, error) {
-	return nil, nil
+	wait := sync.WaitGroup{}
+	done := make(chan int)
+
+	for _, conn := range s.Connection {
+		wait.Add(1)
+
+		go func(msg *proto.Message, conn *Connection) {
+			defer wait.Done()
+
+			if conn.Active && conn.Topic.Name == msg.Topic.Name {
+				err := conn.Stream.Send(msg)
+				if err != nil {
+					grpcLog.Errorf("Error with Stream: %v , on topic: %v - Error: %v", conn.Stream, conn.Topic, err)
+					conn.Active = false
+					conn.error <- err
+
+				}
+				grpcLog.Info("Sending message to topic: ", conn.Topic)
+
+			}
+		}(msg, conn)
+	}
+
+	go func() {
+		wait.Wait()
+		close(done)
+	}()
+
+	return &proto.Close{}, nil
 }
 
+// QueueMessage adds messages to a persistence queue
 func (s *Server) QueueMessage(ctx context.Context, msg *proto.Message) (*proto.Close, error) {
-	return nil, nil
+	wait := sync.WaitGroup{}
+	done := make(chan int)
+
+	wait.Add(1)
+	go func(msg *proto.Message) {
+		defer wait.Done()
+		for idx, ts := range gt.TopicWise {
+			if ts.Topic.Id == msg.Topic.Id {
+				payload := TopicOffset{
+					TopicID: ts.Topic.Id,
+					Offset:  gt.TopicWise[idx].Subs,
+				}
+				LS.TopicOffset = append(LS.TopicOffset, payload)
+				lastOffset := getLatestOffset(ts.Topic.Id)
+				latestOffset := lastOffset + 1
+				msg.Offset = lastOffset
+				gt.TopicWise[idx].Message = append(gt.TopicWise[idx].Message, msg)
+				gt.TopicWise[idx].Subs = latestOffset
+
+				updateOffest(ts.Topic.Id, latestOffset)
+
+				fmt.Println(gt.TopicWise[idx].Subs)
+			}
+		}
+
+	}(msg)
+
+	// fmt.Println(gt)
+	// writeToFile("first.json", gt)
+
+	go func() {
+		wait.Wait()
+		close(done)
+	}()
+
+	return &proto.Close{}, nil
 }
 
 func main() {
