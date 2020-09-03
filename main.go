@@ -19,34 +19,20 @@ var grpcLog glog.LoggerV2
 
 func init() {
 	grpcLog = glog.NewLoggerV2(os.Stdout, os.Stdout, os.Stdout)
-
 }
 
 // Connection struct is the type of data for a connection
 type Connection struct {
-	stream   proto.Broadcast_CreateStreamServer
-	Id       string          `json:"stream"`
-	Active   bool            `json:"active"`
-	Topic    proto.Topic     `json:"topic"`
-	Messages []proto.Message `json:"messages"`
-	error    chan error
+	Stream proto.Deploy_CreateStreamServer `json:"stream"`
+	User   proto.User                      `json:"User"`
+	Active bool                            `json:"Active"`
+	Topic  *proto.Topic                    `json:"Topic"`
+	error  chan error
 }
 
 // Server is a collection of all the succesful connections to create a stream
 type Server struct {
 	Connection []*Connection `json:"connections"`
-}
-
-// TopicSub keeps a track of subs on a particular topic
-type TopicSub struct {
-	Topic    proto.Topic     `json:"topic"`
-	Subs     int64           `json:"subs"`
-	Messages []proto.Message `json:"messages"`
-}
-
-// GlobalTopic hold all topic data
-type GlobalTopic struct {
-	Topics []TopicSub `json:"topics"`
 }
 
 // TopicOffset is a struct in order to keep track of the latest offset
@@ -66,11 +52,11 @@ type LocalStat struct {
 var LS LocalStat
 
 // Instantiate Global topic to keep track of jsonable files to be distributed.
-var gt GlobalTopic
+var gt proto.GlobalTopic
 
 // Find takes a slice and looks for an element in it. If found it will
 // return it's key, otherwise it will return -1 and a bool of false.
-func Find(slice []TopicSub, val string) (int, bool) {
+func Find(slice []*proto.TopicWise, val string) (int, bool) {
 	for i, item := range slice {
 		if item.Topic.Name == val {
 			return i, true
@@ -89,7 +75,7 @@ func getFileStat(path string) int64 {
 	return size
 }
 
-func writeToFile(name string, globalT GlobalTopic) error {
+func writeToFile(name string, globalT proto.GlobalTopic) error {
 	e, err := json.Marshal(globalT)
 	if err != nil {
 		return err
@@ -117,79 +103,54 @@ func getLatestOffset(topicID string) int64 {
 	return offset
 }
 
-// CreateStream ensures the successful connection to start stream
-func (s *Server) CreateStream(pconn *proto.Connect, stream proto.Broadcast_CreateStreamServer) error {
-	conn := &Connection{
-		stream: stream,
-		Id:     pconn.User.Id,
-		Active: true,
-		Topic:  *pconn.Topic,
-		error:  make(chan error),
-	}
-
-	_, result := Find(gt.Topics, conn.Topic.Name)
-	if result == false {
-		fmt.Println("New topic discovered", conn.Topic.Name)
-		payload := TopicSub{
-			Topic: conn.Topic,
-			Subs:  0,
-		}
-		gt.Topics = append(gt.Topics, payload)
-	} else {
-		fmt.Println("old topic found")
-		// payload := TopicSub{
-		// 	subs: 1,
-		// }
-		// gt.topics = append(gt.topics, payload)
-	}
-	s.Connection = append(s.Connection, conn)
-	// fmt.Println("CONN is HERE", &conn)
-	// fmt.Println(gt)
-	return <-conn.error
-}
-
-// QueueMessage is responsible for sending out messages
-func (s *Server) QueueMessage(ctx context.Context, msg *proto.Message) (*proto.Close, error) {
-	wait := sync.WaitGroup{}
-	done := make(chan int)
-
-	wait.Add(1)
-	go func(msg *proto.Message) {
-		defer wait.Done()
-		for idx, ts := range gt.Topics {
-			if ts.Topic.Id == msg.Topic.Id {
-				payload := TopicOffset{
-					TopicID: ts.Topic.Id,
-					Offset:  gt.Topics[idx].Subs,
-				}
-				LS.TopicOffset = append(LS.TopicOffset, payload)
-				lastOffset := getLatestOffset(ts.Topic.Id)
-				latestOffset := lastOffset + 1
-				msg.Id = lastOffset
-				gt.Topics[idx].Messages = append(gt.Topics[idx].Messages, *msg)
-				gt.Topics[idx].Subs = latestOffset
-
-				updateOffest(ts.Topic.Id, latestOffset)
-
-				// fmt.Println(gt.Topics[idx].Subs)
+func getValidScope(UserScopeArray []string, TopicScopeArray []string) bool {
+	var dispatch bool
+	for _, val := range TopicScopeArray {
+		for _, kal := range UserScopeArray {
+			if val == kal {
+				dispatch = true
+			} else {
+				dispatch = false
 			}
 		}
-
-	}(msg)
-
-	// fmt.Println(gt)
-	// writeToFile("first.json", gt)
-
-	go func() {
-		wait.Wait()
-		close(done)
-	}()
-
-	return &proto.Close{}, nil
+	}
+	return dispatch
 }
 
-// BroadcastMessage is responsible for sending out messages
-func (s *Server) BroadcastMessage(ctx context.Context, msg *proto.Message) (*proto.Close, error) {
+// CreateStream ensures the successful connection to start stream
+func (s *Server) CreateStream(pconn *proto.Connect, stream proto.Deploy_CreateStreamServer) error {
+	RbacAuth := getValidScope(pconn.User.Scope, pconn.Topic.Scope)
+	var dispatch chan error
+	if RbacAuth {
+		grpcLog.Info("RBAC : User connected with valid scope")
+		conn := &Connection{
+			Stream: stream,
+			User:   *pconn.User,
+			Active: true,
+			Topic:  pconn.Topic,
+			error:  make(chan error),
+		}
+
+		_, result := Find(gt.TopicWise, conn.Topic.Name)
+		if result == false {
+			payload := &proto.TopicWise{
+				Topic: conn.Topic,
+			}
+			gt.TopicWise = append(gt.TopicWise, payload)
+		} else {
+			fmt.Println("old topic found")
+		}
+		s.Connection = append(s.Connection, conn)
+		dispatch = conn.error
+	} else {
+		grpcLog.Info("RBAC: User attempt blocked due to unauthorisation")
+	}
+
+	return <-dispatch
+}
+
+// DeployMessage produces ASYNC pub-sub
+func (s *Server) DeployMessage(ctx context.Context, msg *proto.Message) (*proto.Close, error) {
 	wait := sync.WaitGroup{}
 	done := make(chan int)
 
@@ -200,9 +161,9 @@ func (s *Server) BroadcastMessage(ctx context.Context, msg *proto.Message) (*pro
 			defer wait.Done()
 
 			if conn.Active && conn.Topic.Name == msg.Topic.Name {
-				err := conn.stream.Send(msg)
+				err := conn.Stream.Send(msg)
 				if err != nil {
-					grpcLog.Errorf("Error with Stream: %v , on topic: %v - Error: %v", conn.stream, conn.Topic, err)
+					grpcLog.Errorf("Error with Stream: %v , on topic: %v - Error: %v", conn.Stream, conn.Topic, err)
 					conn.Active = false
 					conn.error <- err
 
@@ -212,6 +173,46 @@ func (s *Server) BroadcastMessage(ctx context.Context, msg *proto.Message) (*pro
 			}
 		}(msg, conn)
 	}
+
+	go func() {
+		wait.Wait()
+		close(done)
+	}()
+
+	return &proto.Close{}, nil
+}
+
+// QueueMessage adds messages to a persistence queue
+func (s *Server) QueueMessage(ctx context.Context, msg *proto.Message) (*proto.Close, error) {
+	wait := sync.WaitGroup{}
+	done := make(chan int)
+
+	wait.Add(1)
+	go func(msg *proto.Message) {
+		defer wait.Done()
+		for idx, ts := range gt.TopicWise {
+			if ts.Topic.Id == msg.Topic.Id {
+				payload := TopicOffset{
+					TopicID: ts.Topic.Id,
+					Offset:  gt.TopicWise[idx].Subs,
+				}
+				LS.TopicOffset = append(LS.TopicOffset, payload)
+				lastOffset := getLatestOffset(ts.Topic.Id)
+				latestOffset := lastOffset + 1
+				msg.Offset = lastOffset
+				gt.TopicWise[idx].Message = append(gt.TopicWise[idx].Message, msg)
+				gt.TopicWise[idx].Subs = latestOffset
+
+				updateOffest(ts.Topic.Id, latestOffset)
+
+				fmt.Println(gt.TopicWise[idx].Subs)
+			}
+		}
+
+	}(msg)
+
+	// fmt.Println(gt)
+	// writeToFile("first.json", gt)
 
 	go func() {
 		wait.Wait()
@@ -234,7 +235,6 @@ func main() {
 
 	grpcLog.Info("Starting server on port 8000")
 
-	proto.RegisterBroadcastServer(grpcServer, server)
+	proto.RegisterDeployServer(grpcServer, server)
 	grpcServer.Serve(listener)
-
 }

@@ -20,7 +20,7 @@ type offset struct {
 	idx int64
 }
 
-var client proto.BroadcastClient
+var client proto.DeployClient
 var wait *sync.WaitGroup
 var o offset
 
@@ -42,7 +42,7 @@ func connect(user *proto.User, topic *proto.Topic) error {
 	}
 
 	wait.Add(1)
-	go func(str proto.Broadcast_CreateStreamClient) {
+	go func(str proto.Deploy_CreateStreamClient) {
 		defer wait.Done()
 		for {
 			msg, err := str.Recv()
@@ -67,27 +67,36 @@ func main() {
 
 	name := flag.String("N", "Guest", "name of the access")
 	topicName := flag.String("T", "NewTopic", "Topic of message")
+	UserScope := flag.String("US", "User", "Access Scope")
+	TopicScope := flag.String("TS", "User", "Access scope for topic")
 
 	flag.Parse()
 
 	UserID := sha256.Sum256([]byte("USER" + *name))
 	TopicID := sha256.Sum256([]byte("TOPIC" + *topicName))
 
+	var UserScopeArray []string
+	var TopicScopeArray []string
+
+	UserScopeArray = append(UserScopeArray, *UserScope)
+	TopicScopeArray = append(TopicScopeArray, *TopicScope)
+
 	conn, err := grpc.Dial("localhost:8000", grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("Couldnt connect to service: %v", err)
 	}
 
-	client = proto.NewBroadcastClient(conn)
+	client = proto.NewDeployClient(conn)
 
 	user := &proto.User{
-		Id:   hex.EncodeToString(UserID[:]),
-		Name: *name,
+		Id:    hex.EncodeToString(UserID[:]),
+		Scope: UserScopeArray,
 	}
 
 	topic := &proto.Topic{
-		Id:   hex.EncodeToString(TopicID[:]),
-		Name: *topicName,
+		Id:    hex.EncodeToString(TopicID[:]),
+		Name:  *topicName,
+		Scope: TopicScopeArray,
 	}
 
 	connect(user, topic)
@@ -99,13 +108,13 @@ func main() {
 		scanner := bufio.NewScanner(os.Stdin)
 		for scanner.Scan() {
 			msg := &proto.Message{
-				Id:        o.idx,
+				Offset:    o.idx,
 				Content:   scanner.Text(),
 				Timestamp: timestamp.String(),
 				Topic:     topic,
 			}
 
-			_, err := client.BroadcastMessage(context.Background(), msg)
+			_, err := client.DeployMessage(context.Background(), msg)
 			if err != nil {
 				fmt.Printf("Error Sending Message: %v", err)
 				break
