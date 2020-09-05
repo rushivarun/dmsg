@@ -71,7 +71,7 @@ func connect(user *proto.User, topic *proto.Topic) error {
 			_, Duplicates := Find(recieved.Recieved, msg.Id)
 
 			if Duplicates {
-				fmt.Println("Found Duplicates")
+				// fmt.Println("Found Duplicates")
 				fmt.Printf("%v : %s\n", msg.Id, msg.Content)
 			} else {
 				recieved.Recieved = append(recieved.Recieved, msg.Id)
@@ -132,7 +132,7 @@ func main() {
 
 		scanner := bufio.NewScanner(os.Stdin)
 		for scanner.Scan() {
-			messageID := sha256.Sum256([]byte("ID" + timestamp.String() + scanner.Text()))
+			messageID := sha256.Sum256([]byte("ID" + scanner.Text()))
 			msg := &proto.Message{
 				Id:        hex.EncodeToString(messageID[:]),
 				Offset:    o.idx,
