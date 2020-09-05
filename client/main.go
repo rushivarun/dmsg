@@ -20,15 +20,15 @@ type offset struct {
 	idx int64
 }
 
-// MessageID has a Recieved list keeps a lost of all the recieved messages in order to avoid duplication.
-type MessageID struct {
+// Messages has a Recieved list keeps a lost of all the recieved messages in order to avoid duplication.
+type Messages struct {
 	Recieved []string
 }
 
 var client proto.DeployClient
 var wait *sync.WaitGroup
 var o offset
-var recieved MessageID
+var recieved Messages
 
 // Find takes a slice and looks for an element in it. If found it will
 // return it's key, otherwise it will return -1 and a bool of false.
