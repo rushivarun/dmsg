@@ -20,15 +20,15 @@ type offset struct {
 	idx int64
 }
 
-// MessageID has a Recieved list keeps a lost of all the recieved messages in order to avoid duplication.
-type MessageID struct {
+// Messages has a Recieved list keeps a lost of all the recieved messages in order to avoid duplication.
+type Messages struct {
 	Recieved []string
 }
 
 var client proto.DeployClient
 var wait *sync.WaitGroup
 var o offset
-var recieved MessageID
+var recieved Messages
 
 // Find takes a slice and looks for an element in it. If found it will
 // return it's key, otherwise it will return -1 and a bool of false.
@@ -71,7 +71,8 @@ func connect(user *proto.User, topic *proto.Topic) error {
 			_, Duplicates := Find(recieved.Recieved, msg.Id)
 
 			if Duplicates {
-				fmt.Println("Found Duplicates")
+				// fmt.Println("Found Duplicates")
+				fmt.Printf("%v : %s\n", msg.Id, msg.Content)
 			} else {
 				recieved.Recieved = append(recieved.Recieved, msg.Id)
 				fmt.Printf("%v : %s\n", msg.Id, msg.Content)
@@ -131,12 +132,14 @@ func main() {
 
 		scanner := bufio.NewScanner(os.Stdin)
 		for scanner.Scan() {
+			messageID := sha256.Sum256([]byte("ID" + scanner.Text()))
 			msg := &proto.Message{
-				Id:        scanner.Text(),
+				Id:        hex.EncodeToString(messageID[:]),
 				Offset:    o.idx,
 				Content:   scanner.Text(),
 				Timestamp: timestamp.String(),
 				Topic:     topic,
+				User:      user,
 			}
 
 			_, err := client.DeployMessage(context.Background(), msg)

@@ -29,6 +29,7 @@ message Message {
     string timestamp = 6;
 }
 
+
 message TopicWise {
     Topic topic = 1;
     int64 subs = 2;
