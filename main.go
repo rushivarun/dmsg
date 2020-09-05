@@ -205,13 +205,11 @@ func (s *Server) QueueMessage(ctx context.Context, msg *proto.Message) (*proto.C
 
 				updateOffest(ts.Topic.Id, latestOffset)
 
-				fmt.Println(gt.TopicWise[idx].Subs)
+				// fmt.Println(gt.TopicWise[idx].Subs)
 			}
 		}
 
 	}(msg)
-
-	// fmt.Println(gt)
 	// writeToFile("first.json", gt)
 
 	go func() {
