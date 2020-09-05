@@ -73,10 +73,10 @@ func connect(user *proto.User, topic *proto.Topic) error {
 			if Duplicates {
 				fmt.Println("Found Duplicates")
 			} else {
+				recieved.Recieved = append(recieved.Recieved, msg.Id)
 				fmt.Printf("%v : %s\n", msg.Id, msg.Content)
 			}
 		}
-		fmt.Println(recieved.Recieved)
 
 	}(stream)
 
