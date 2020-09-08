@@ -4,7 +4,7 @@ async pub-sub messaging system
 ## To get started
 Install go 1.15, git
 
-### Clone the repo.
+### Clone the repo
 ```
 git clone https://github.com/rushivarun/dmsg.git
 cd dmsg
