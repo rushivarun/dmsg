@@ -1,5 +1,5 @@
 # dmsg
-async pub-sub messaging system
+async pub-sub messaging 
 
 ## To get started
 Install go 1.15, git
